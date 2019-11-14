@@ -31,12 +31,12 @@ property :owner, [String, Integer]
 
 action :change do
   Chef::Log.debug('part_file::change')
-  if ::File.exist?(path)
+  if ::File.exist?(new_resource.path)
     file_contents = []
     matched = false
-    ::IO.read(path).lines.each do |line|
-      if line =~ /#{match}/
-        line.sub!(/#{match}/, new_resource.content) unless matched
+    ::IO.read(new_resource.path).lines.each do |line|
+      if line =~ /#{new_resource.match}/
+          line.sub!(/#{new_resource.match}/, new_resource.content) unless matched
         matched = true if new_resource.all == false
       end
       file_contents << line
@@ -50,17 +50,17 @@ action :change do
       manage_symlink_source new_resource.manage_symlink_source unless new_resource.manage_symlink_source.nil?
     end
   else
-    Chef::Log.debug("part_file::delete: File #{path} doesn't exist")
+    Chef::Log.debug("part_file::change: File #{new_resource.path} doesn't exist")
   end
 end
 
 action :delete do
   Chef::Log.debug('part_file::delete')
-  if ::File.exist?(path)
+  if ::File.exist?(new_resource.path)
     file_contents = []
     matched = false
-    ::IO.read(path).lines.each do |line|
-      if line =~ /#{match}/
+    ::IO.read(new_resource.path).lines.each do |line|
+      if line =~ /#{new_resource.match}/
         file_contents << line if matched
         matched = true if new_resource.all == false
       else
@@ -76,18 +76,18 @@ action :delete do
       manage_symlink_source new_resource.manage_symlink_source unless new_resource.manage_symlink_source.nil?
     end
   else
-    Chef::Log.debug("part_file::delete: File #{path} doesn't exist")
+    Chef::Log.debug("part_file::delete: File #{new_resource.path} doesn't exist")
   end
 end
 
 action :after do
   Chef::Log.debug('part_file::after')
-  if ::File.exist?(path)
+  if ::File.exist?(new_resource.path)
     file_contents = []
     matched = false
-    ::IO.read(path).lines.each do |line|
+    ::IO.read(new_resource.path).lines.each do |line|
       file_contents << line
-      if line =~ /#{match}/
+      if line =~ /#{new_resource.match}/
         file_contents << new_resource.content unless matched
         matched = true if new_resource.all == false
       end
@@ -101,7 +101,7 @@ action :after do
       manage_symlink_source new_resource.manage_symlink_source unless new_resource.manage_symlink_source.nil?
     end
   else
-    Chef::Log.debug("part_file::after: File #{path} doesn't exist - creating it")
+    Chef::Log.debug("part_file::after: File #{new_resource.path} doesn't exist - creating it")
     file new_resource.path do
       content new_resource.content
       backup new_resource.backup unless new_resource.backup.nil?
@@ -115,11 +115,11 @@ end
 
 action :before do
   Chef::Log.debug('part_file::before')
-  if ::File.exist?(path)
+  if ::File.exist?(new_resource.path)
     file_contents = []
     matched = false
-    ::IO.read(path).lines.each do |line|
-      if line =~ /#{match}/
+    ::IO.read(new_resource.path).lines.each do |line|
+      if line =~ /#{new_resource.match}/
         file_contents << new_resource.content unless matched
         matched = true if new_resource.all == false
       end
@@ -134,7 +134,7 @@ action :before do
       manage_symlink_source new_resource.manage_symlink_source unless new_resource.manage_symlink_source.nil?
     end
   else
-    Chef::Log.debug("part_file::before: File #{path} doesn't exist - creating it")
+    Chef::Log.debug("part_file::before: File #{new_resource.path} doesn't exist - creating it")
     file new_resource.path do
       content new_resource.content
       backup new_resource.backup unless new_resource.backup.nil?
